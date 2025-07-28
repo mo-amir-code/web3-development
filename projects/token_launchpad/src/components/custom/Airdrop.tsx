@@ -8,13 +8,12 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Input } from "../ui/input";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 
 const Airdrop = () => {
   const [airdropAddress, setAirdropAddress] = useState<string>("");
   const [amount, setAmount] = useState<number>(0);
-  const wallet = useWallet();
   const { connection } = useConnection();
 
   const handleAirdrop = async () => {
