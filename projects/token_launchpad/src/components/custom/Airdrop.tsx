@@ -10,18 +10,28 @@ import {
 import { Input } from "../ui/input";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import toast from "react-hot-toast";
 
 const Airdrop = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [airdropAddress, setAirdropAddress] = useState<string>("");
   const [amount, setAmount] = useState<number>(0);
   const { connection } = useConnection();
 
   const handleAirdrop = async () => {
-    const airAddress = new PublicKey(airdropAddress);
-
-    await connection.requestAirdrop(airAddress, amount * LAMPORTS_PER_SOL);
-
-    console.log("Airdroped sol successfully");
+    setIsLoading(true);
+    const tId = toast.loading("Airdropping....");
+    try {
+      const airAddress = new PublicKey(airdropAddress);
+      await connection.requestAirdrop(airAddress, amount * LAMPORTS_PER_SOL);
+      toast.success("Airdropped successfully");
+    } catch (_error) {
+      toast.error("Error occurred while airdropping!");
+      console.error(_error);
+    } finally {
+      setIsLoading(false);
+      toast.dismiss(tId);
+    }
   };
 
   return (
@@ -51,7 +61,9 @@ const Airdrop = () => {
                 setAmount(parseFloat(e.target.value as string));
               }}
             />
-            <Button onClick={() => handleAirdrop()}>Airdrop</Button>
+            <Button disabled={isLoading} onClick={() => handleAirdrop()}>
+              Airdrop
+            </Button>
           </div>
         </div>
       </CardContent>

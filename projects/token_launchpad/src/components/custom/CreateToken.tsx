@@ -8,26 +8,30 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Input } from "../ui/input";
-import { Keypair, LAMPORTS_PER_SOL, SystemProgram, Transaction } from "@solana/web3.js";
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
 import {
   createAssociatedTokenAccountInstruction,
   createInitializeMetadataPointerInstruction,
-  createInitializeMint2Instruction,
   createInitializeMintInstruction,
   createMintToInstruction,
   ExtensionType,
   getAssociatedTokenAddressSync,
-  getMinimumBalanceForRentExemptMint,
   getMintLen,
   LENGTH_SIZE,
-  MINT_SIZE,
   TOKEN_2022_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
   TYPE_SIZE,
 } from "@solana/spl-token";
 import { createInitializeInstruction, pack } from "@solana/spl-token-metadata";
+import toast from "react-hot-toast";
+import { useState } from "react";
 
 const CreateToken = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const wallet = useWallet();
   const { connection } = useConnection();
 
@@ -47,6 +51,19 @@ const CreateToken = () => {
     const metadataUri =
       (document.getElementById("metadata") as HTMLInputElement).value || "";
 
+    if (
+      tokenName.length == 0 ||
+      tokenSymbol.length == 0 ||
+      tokenDecimal == 0 ||
+      metadataUri.length == 0
+    ) {
+      toast.error("All token fields are required");
+      return;
+    }
+
+    setIsLoading(true);
+    const tId = toast.loading("Token is creating....");
+
     const mintKeyPair = Keypair.generate();
 
     const metadata = {
@@ -57,59 +74,69 @@ const CreateToken = () => {
       additionalMetadata: [],
     };
 
-    const mintLen = getMintLen([ExtensionType.MetadataPointer]);
-    const metadataLen = TYPE_SIZE + LENGTH_SIZE + pack(metadata).length;
+    try {
+      const mintLen = getMintLen([ExtensionType.MetadataPointer]);
+      const metadataLen = TYPE_SIZE + LENGTH_SIZE + pack(metadata).length;
 
-    // const lamports = await getMinimumBalanceForRentExemptMint(connection);
-    const lamports = await connection.getMinimumBalanceForRentExemption(
-      mintLen + metadataLen
-    );
+      // const lamports = await getMinimumBalanceForRentExemptMint(connection);
+      const lamports = await connection.getMinimumBalanceForRentExemption(
+        mintLen + metadataLen
+      );
 
-    const txn = new Transaction();
-    txn.add(
-      SystemProgram.createAccount({
-        fromPubkey: wallet.publicKey,
-        newAccountPubkey: mintKeyPair.publicKey,
-        space: mintLen,
-        lamports,
-        programId: TOKEN_2022_PROGRAM_ID,
-      }),
-      createInitializeMetadataPointerInstruction(
-        mintKeyPair.publicKey,
-        wallet.publicKey,
-        mintKeyPair.publicKey,
-        TOKEN_2022_PROGRAM_ID
-      ),
-      createInitializeMintInstruction(
-        mintKeyPair.publicKey,
-        tokenDecimal,
-        wallet.publicKey,
-        wallet.publicKey,
-        TOKEN_2022_PROGRAM_ID
-      ),
-      createInitializeInstruction({
-        programId: TOKEN_2022_PROGRAM_ID,
-        mint: mintKeyPair.publicKey,
-        metadata: mintKeyPair.publicKey,
-        name: metadata.name,
-        symbol: metadata.symbol,
-        uri: metadata.uri,
-        mintAuthority: wallet.publicKey,
-        updateAuthority: wallet.publicKey,
-      })
-    );
+      const txn = new Transaction();
+      txn.add(
+        SystemProgram.createAccount({
+          fromPubkey: wallet.publicKey,
+          newAccountPubkey: mintKeyPair.publicKey,
+          space: mintLen,
+          lamports,
+          programId: TOKEN_2022_PROGRAM_ID,
+        }),
+        createInitializeMetadataPointerInstruction(
+          mintKeyPair.publicKey,
+          wallet.publicKey,
+          mintKeyPair.publicKey,
+          TOKEN_2022_PROGRAM_ID
+        ),
+        createInitializeMintInstruction(
+          mintKeyPair.publicKey,
+          tokenDecimal,
+          wallet.publicKey,
+          wallet.publicKey,
+          TOKEN_2022_PROGRAM_ID
+        ),
+        createInitializeInstruction({
+          programId: TOKEN_2022_PROGRAM_ID,
+          mint: mintKeyPair.publicKey,
+          metadata: mintKeyPair.publicKey,
+          name: metadata.name,
+          symbol: metadata.symbol,
+          uri: metadata.uri,
+          mintAuthority: wallet.publicKey,
+          updateAuthority: wallet.publicKey,
+        })
+      );
 
-    txn.feePayer = wallet.publicKey;
-    txn.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-    txn.partialSign(mintKeyPair);
+      txn.feePayer = wallet.publicKey;
+      txn.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+      txn.partialSign(mintKeyPair);
 
-    await wallet.sendTransaction(txn, connection);
+      await wallet.sendTransaction(txn, connection);
 
-    console.log(
-      "New Token created successfully! " + mintKeyPair.publicKey.toBase58()
-    );
+      console.log(
+        "New Token created successfully! Token Keypair: " +
+          mintKeyPair.publicKey.toBase58()
+      );
 
-    handleMintTokens(mintKeyPair);
+      handleMintTokens(mintKeyPair);
+      toast.success("Token created successfully");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error occurred while creating token!");
+    } finally {
+      setIsLoading(false);
+      toast.dismiss(tId);
+    }
   };
 
   const handleMintTokens = async (mintKeyPair: Keypair) => {
@@ -119,7 +146,7 @@ const CreateToken = () => {
       (document.getElementById("supply") as HTMLInputElement).value || "0"
     );
 
-    console.log("Token Supply: ", tokenSupply)
+    console.log("Token Supply: ", tokenSupply);
 
     const associatedToken = getAssociatedTokenAddressSync(
       mintKeyPair.publicKey,
@@ -197,7 +224,9 @@ const CreateToken = () => {
           </div>
           <Input type="text" placeholder="Metadata URL" id="metadata" />
 
-          <Button onClick={() => handleMintToken()}>Deploy Token</Button>
+          <Button disabled={isLoading} onClick={() => handleMintToken()}>
+            Deploy Token
+          </Button>
         </div>
       </CardContent>
     </Card>

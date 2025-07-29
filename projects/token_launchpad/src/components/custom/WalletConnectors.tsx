@@ -5,6 +5,7 @@ import {
   WalletModalProvider,
 } from "@solana/wallet-adapter-react-ui";
 import "@solana/wallet-adapter-react-ui/styles.css";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useEffect, useState } from "react";
 
 const WalletConnectors = () => {
@@ -34,17 +35,19 @@ const WalletConnectors = () => {
     <WalletModalProvider>
       <section
         id="wallets"
-        className="w-full flex items-center justify-between"
+        className="w-full flex sm:items-center max-sm:gap-4 justify-between max-sm:flex-col"
       >
-        <WalletDisconnectButton />
+        <div>
+          <WalletDisconnectButton />
+        </div>
 
-        <div className="flex items-center gap-2 justify-end">
+        <div className="flex max-sm:flex-row-reverse items-center gap-2 justify-end">
           {balance != 0 ? (
             <div className="flex items-center justify-center">
               <span> Sol:</span>{" "}
               <span>
                 {" "}
-                <strong>{balance}</strong>{" "}
+                <strong>{(balance / LAMPORTS_PER_SOL).toFixed(4)}</strong>{" "}
               </span>
             </div>
           ) : (

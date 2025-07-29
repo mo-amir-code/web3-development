@@ -15,8 +15,10 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
+import toast from "react-hot-toast";
 
 const Transfer = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [toAddress, setToAddress] = useState<string>("");
   const [amount, setAmount] = useState<number>(0);
   const wallet = useWallet();
@@ -28,17 +30,27 @@ const Transfer = () => {
       return;
     }
 
-    const txn = new Transaction();
-    txn.add(
-      SystemProgram.transfer({
-        fromPubkey: wallet.publicKey,
-        toPubkey: new PublicKey(toAddress),
-        lamports: amount * LAMPORTS_PER_SOL,
-      })
-    );
+    setIsLoading(true);
+    const tId = toast.loading("Sending....");
+    try {
+      const txn = new Transaction();
+      txn.add(
+        SystemProgram.transfer({
+          fromPubkey: wallet.publicKey,
+          toPubkey: new PublicKey(toAddress),
+          lamports: amount * LAMPORTS_PER_SOL,
+        })
+      );
+      await wallet.sendTransaction(txn, connection);
 
-    await wallet.sendTransaction(txn, connection);
-    console.log("Amount: " + amount * LAMPORTS_PER_SOL + " send successfully");
+      toast.success(amount + " SOL has been sent");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error occurred while transferring!");
+    } finally {
+      setIsLoading(false);
+      toast.dismiss(tId);
+    }
   };
 
   return (
@@ -52,7 +64,7 @@ const Transfer = () => {
       </CardHeader>
 
       <CardContent>
-        <div className="space-y-4" >
+        <div className="space-y-4">
           <Input
             type="text"
             placeholder="sol address eg: 4ExCkT4h9ri..."
@@ -68,7 +80,9 @@ const Transfer = () => {
                 setAmount(parseFloat(e.target.value as string));
               }}
             />
-            <Button onClick={() => handleTransfer()}>Transfer</Button>
+            <Button disabled={isLoading} onClick={() => handleTransfer()}>
+              Transfer
+            </Button>
           </div>
         </div>
       </CardContent>
