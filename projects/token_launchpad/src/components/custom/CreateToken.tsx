@@ -38,6 +38,7 @@ const CreateToken = () => {
   const handleMintToken = async () => {
     if (!wallet.publicKey) {
       console.error("Wallet is not connected.....");
+      toast.error("Connect your wallet");
       return;
     }
 

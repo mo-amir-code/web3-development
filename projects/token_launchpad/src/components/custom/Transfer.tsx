@@ -27,6 +27,7 @@ const Transfer = () => {
   const handleTransfer = async () => {
     if (!wallet.publicKey) {
       console.log("Wallet is not connected....");
+      toast.error("Connect your wallet")
       return;
     }
 
