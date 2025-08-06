@@ -8,20 +8,22 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Input } from "../ui/input";
-import { useConnection } from "@solana/wallet-adapter-react";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+// import { useConnection } from "@solana/wallet-adapter-react";
+import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import toast from "react-hot-toast";
+// import { alchemyConnections } from "@/util/data";
 
 const Airdrop = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [airdropAddress, setAirdropAddress] = useState<string>("");
   const [amount, setAmount] = useState<number>(0);
-  const { connection } = useConnection();
+  // const { connection } = useConnection();
 
   const handleAirdrop = async () => {
     setIsLoading(true);
     const tId = toast.loading("Airdropping....");
     try {
+      const connection = new Connection(clusterApiUrl("devnet"));
       const airAddress = new PublicKey(airdropAddress);
       await connection.requestAirdrop(airAddress, amount * LAMPORTS_PER_SOL);
       toast.success("Airdropped successfully");

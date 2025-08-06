@@ -1,4 +1,4 @@
-import { devnetTokens as tokens } from "@/util/data";
+import { tokens } from "@/util/data";
 import { Input } from "../ui/input";
 import {
   Select,

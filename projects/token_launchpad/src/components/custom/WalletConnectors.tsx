@@ -42,12 +42,14 @@ const WalletConnectors = () => {
         </div>
 
         <div className="flex max-sm:flex-row-reverse items-center gap-2 justify-end">
-          {balance != 0 ? (
+          {wallet.connected ? (
             <div className="flex items-center justify-center">
               <span> Sol:</span>{" "}
               <span>
                 {" "}
-                <strong>{(balance / LAMPORTS_PER_SOL).toFixed(4)}</strong>{" "}
+                <strong>
+                  {balance === 0 ? 0 : (balance / LAMPORTS_PER_SOL).toFixed(4)}
+                </strong>{" "}
               </span>
             </div>
           ) : (

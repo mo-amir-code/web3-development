@@ -1,4 +1,4 @@
-import { alchemyConnections, devnetTokens as tokens } from "@/util/data";
+import { tokens } from "@/util/data";
 import { Button } from "../ui/button";
 import {
   Card,
@@ -29,17 +29,16 @@ const Swap = () => {
   const { connection } = useConnection();
 
   const handleSwapToken = async () => {
-    if (!wallet || !wallet.publicKey) {
+    if (!wallet || !wallet.publicKey || !wallet.signTransaction) {
       return;
     }
 
     const quoteResponse = await fetchQuote();
-    console.log(quoteResponse)
+    console.log("Quote Response: ", quoteResponse)
 
     const res = await axios.post("https://lite-api.jup.ag/swap/v1/swap", {
       quoteResponse,
       userPublicKey: wallet.publicKey.toString(),
-      network: "devnet",
 
       // ADDITIONAL PARAMETERS TO OPTIMIZE FOR TRANSACTION LANDING
       // See next guide to optimize for transaction landing
@@ -59,14 +58,19 @@ const Swap = () => {
     const transaction = VersionedTransaction.deserialize(
       Buffer.from(transactionBase64, "base64")
     );
-    console.log(transaction);
-
-    const transactionBinary = transaction.serialize();
-    console.log(transactionBinary);
+    console.log("Deserialized Transaction: ", transaction);
 
     try {
+      const signedTransaction = await wallet.signTransaction(transaction);
+      const transactionBinary = signedTransaction.serialize();
+      
+      
+      const signature = await connection.sendRawTransaction(transactionBinary, {
+        maxRetries: 2,
+        skipPreflight: true
+      })
+      
       const latestBlockhash = await connection.getLatestBlockhash();
-      const signature = await wallet.sendTransaction(transaction, connection);
 
       await connection.confirmTransaction(
         {
@@ -79,17 +83,8 @@ const Swap = () => {
 
       console.log("Swap tx signature:", signature);
     } catch (error) {
-      console.log(error);
+      console.error("Error Occurred: ", error);
     }
-
-    // const signature = await connection.sendRawTransaction(transactionBinary, {
-    //   maxRetries: 2,
-    //   skipPreflight: true,
-    // });
-
-    // console.log(signature)
-
-    // const confirmation = await connection.confirmTransaction({signature,}, "finalized");
   };
 
   const handleSwapCurrencies = () => {
@@ -111,13 +106,16 @@ const Swap = () => {
     const uri = `https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${convertAmountIntoRaw(
       inAmount,
       token.decimals
-    )}&slippageBps=50&restrictIntermediateTokens=true&network=devnet`;
+    )}&slippageBps=50&restrictIntermediateTokens=true`;
     const res = await axios.get(uri);
 
     const outAmount = parseInt(res.data.outAmount);
     setOutAmount(
       convertRawAmountIntoHumanReadableForm(outAmount, outToken.decimals)
     );
+
+    console.log("Swap Quote: ", res.data)
+
     return res.data;
   };
 
