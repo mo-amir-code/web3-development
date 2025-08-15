@@ -5,20 +5,22 @@ const app = express();
 
 
 app.post('/helius', async(req:any, res:any) => {
-    const fromAddress = req.body.fromAddress;
-    const toAddress = req.body.toAddress;
-    const amount = req.body.amount;
-    const type = "received_native_sol";
-
     console.log(req.body)
 
-    if (type === "received_native_sol") {
-        await mintTokens(fromAddress, toAddress, amount);
-    } else {
-        // What could go wrong here?
-        await burnTokens(fromAddress, toAddress, amount);
-        await sendNativeTokens(fromAddress, toAddress, amount);
-    }
+
+    // const fromAddress = req.body.fromAddress;
+    // const toAddress = req.body.toAddress;
+    // const amount = req.body.amount;
+    // const type = "received_native_sol";
+
+
+    // if (type === "received_native_sol") {
+    //     await mintTokens(fromAddress, toAddress, amount);
+    // } else {
+    //     // What could go wrong here?
+    //     await burnTokens(fromAddress, toAddress, amount);
+    //     await sendNativeTokens(fromAddress, toAddress, amount);
+    // }
 
     res.send('Transaction successful');
 });
