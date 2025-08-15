@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-require('dotenv').config();
 const express_1 = __importDefault(require("express"));
 const mintTokens_1 = require("./mintTokens");
 const app = (0, express_1.default)();
