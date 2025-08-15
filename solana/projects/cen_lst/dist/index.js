@@ -13,24 +13,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const mintTokens_1 = require("./mintTokens");
 const app = (0, express_1.default)();
-app.post('/helius', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const fromAddress = req.body.fromAddress;
-    const toAddress = req.body.toAddress;
-    const amount = req.body.amount;
-    const type = "received_native_sol";
+app.use(express_1.default.json());
+const data = [];
+app.post("/helius", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(req.body);
-    if (type === "received_native_sol") {
-        yield (0, mintTokens_1.mintTokens)(fromAddress, toAddress, amount);
-    }
-    else {
-        // What could go wrong here?
-        yield (0, mintTokens_1.burnTokens)(fromAddress, toAddress, amount);
-        yield (0, mintTokens_1.sendNativeTokens)(fromAddress, toAddress, amount);
-    }
-    res.send('Transaction successful');
+    data.push(req.body);
+    // const fromAddress = req.body.fromAddress;
+    // const toAddress = req.body.toAddress;
+    // const amount = req.body.amount;
+    // const type = "received_native_sol";
+    // if (type === "received_native_sol") {
+    //     await mintTokens(fromAddress, toAddress, amount);
+    // } else {
+    //     // What could go wrong here?
+    //     await burnTokens(fromAddress, toAddress, amount);
+    //     await sendNativeTokens(fromAddress, toAddress, amount);
+    // }
+    res.send("Transaction successful");
 }));
+app.get("/", (_req, res) => {
+    res.json(data);
+});
 app.listen(3000, () => {
-    console.log('Server is running on port 3000');
+    console.log("Server is running on port 3000");
 });

@@ -23,10 +23,11 @@ app.post("/helius", async (req: any, res: any) => {
   //     await sendNativeTokens(fromAddress, toAddress, amount);
   // }
 
+
   res.send("Transaction successful");
 });
 
-app.get("/", (_req, res) => {
+app.get("/", (_req:any, res:any) => {
   res.json(data);
 });
 
