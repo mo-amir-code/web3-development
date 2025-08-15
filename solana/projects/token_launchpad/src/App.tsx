@@ -9,6 +9,7 @@ const App = () => {
         <main className="z-10 flex flex-col items-center gap-4 justify-center">
           <WalletConnectors />
           <Features />
+          
         </main>
 
         <BackgroundBeams />

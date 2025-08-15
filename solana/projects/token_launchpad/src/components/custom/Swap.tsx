@@ -17,7 +17,8 @@ import {
 import toast from "react-hot-toast";
 import swapIcon from "@/assets/swap-icon.svg";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { VersionedTransaction } from "@solana/web3.js";
+import { PublicKey, VersionedTransaction } from "@solana/web3.js";
+import { getAssociatedTokenAddress } from "@solana/spl-token";
 
 const Swap = () => {
   const [inputMint, setInputMint] = useState<string>(tokens[0].mint);
@@ -28,17 +29,42 @@ const Swap = () => {
   const wallet = useWallet();
   const { connection } = useConnection();
 
+  const handleToValidateWallet = () => {
+    if (!wallet || !wallet.publicKey || !wallet.signAllTransactions)
+      return false;
+    return true;
+  };
+
+  const handleToGetMaxBalanceOfToken = async () => {
+    if (!handleToValidateWallet()) return;
+
+    const ata = await getAssociatedTokenAddress(
+      new PublicKey(inputMint),
+      wallet.publicKey!
+    );
+
+    const balanceRes = await connection.getTokenAccountBalance(ata);
+    const balance = convertRawAmountIntoHumanReadableForm(
+      parseInt(balanceRes.value.amount),
+      balanceRes.value.decimals
+    );
+
+    console.log("Balance: ", balance);
+    setInAmount(balance);
+  };
+
   const handleSwapToken = async () => {
     if (!wallet || !wallet.publicKey || !wallet.signTransaction) {
       return;
     }
 
     const quoteResponse = await fetchQuote();
-    console.log("Quote Response: ", quoteResponse)
+    console.log("Quote Response: ", quoteResponse);
 
     const res = await axios.post("https://lite-api.jup.ag/swap/v1/swap", {
       quoteResponse,
       userPublicKey: wallet.publicKey.toString(),
+      // network: "devnet",
 
       // ADDITIONAL PARAMETERS TO OPTIMIZE FOR TRANSACTION LANDING
       // See next guide to optimize for transaction landing
@@ -62,24 +88,30 @@ const Swap = () => {
 
     try {
       const signedTransaction = await wallet.signTransaction(transaction);
+      console.log("After Signing Transaction");
+
       const transactionBinary = signedTransaction.serialize();
-      
-      
+      console.log("After Serialiazing signedTransaction");
+
       const signature = await connection.sendRawTransaction(transactionBinary, {
         maxRetries: 2,
-        skipPreflight: true
-      })
-      
-      const latestBlockhash = await connection.getLatestBlockhash();
+        skipPreflight: true,
+      });
+      console.log("Raw transaction sig: ", signature);
+      console.log("After sending raw transaction on the connection");
+
+      const { blockhash, lastValidBlockHeight } =
+        await connection.getLatestBlockhash();
 
       await connection.confirmTransaction(
         {
+          blockhash,
+          lastValidBlockHeight,
           signature,
-          blockhash: latestBlockhash.blockhash,
-          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
         },
         "finalized"
       );
+      console.log("After confirming transaction");
 
       console.log("Swap tx signature:", signature);
     } catch (error) {
@@ -114,7 +146,7 @@ const Swap = () => {
       convertRawAmountIntoHumanReadableForm(outAmount, outToken.decimals)
     );
 
-    console.log("Swap Quote: ", res.data)
+    console.log("Swap Quote: ", res.data);
 
     return res.data;
   };
@@ -140,6 +172,7 @@ const Swap = () => {
             onInAmountChange={setInAmount}
             onChange={setInputMint}
             token={inputMint}
+            maxFunc={handleToGetMaxBalanceOfToken}
           />
 
           <div className="flex items-center justify-center">

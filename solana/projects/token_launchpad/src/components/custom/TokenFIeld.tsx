@@ -14,6 +14,7 @@ type TokenFieldType = {
   amount: number;
   onInAmountChange?: Function;
   isOutputField?: boolean;
+  maxFunc?: Function
 };
 
 const TokenFIeld = ({
@@ -22,6 +23,7 @@ const TokenFIeld = ({
   token,
   onChange,
   onInAmountChange,
+  maxFunc,
 }: TokenFieldType) => {
   return (
     <div className="flex items-center justify-between p-2 gap-2 border rounded-md">
@@ -31,6 +33,7 @@ const TokenFIeld = ({
         disabled={isOutputField ? true : false}
         autoFocus
         value={amount}
+        maxFunc={maxFunc}
         onChange={(e) => {
           if (onInAmountChange) {
             onInAmountChange(e.target.value);

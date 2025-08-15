@@ -1,4 +1,3 @@
-// import { alchemyConnections } from "@/util/data";
 import { alchemyConnections } from "@/util/data";
 import {
   ConnectionProvider,
