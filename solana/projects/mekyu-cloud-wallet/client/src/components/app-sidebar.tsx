@@ -9,36 +9,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Avatar } from "./ui/avatar";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import ButtonWithIcon from "./ui/ButtonWithIcon";
-
-// This is sample data.
-const data = {
-  navMain: [
-    {
-      title: "Getting Started",
-      url: "#",
-      items: [
-        {
-          title: "Installation",
-          url: "#",
-        },
-        {
-          title: "Project Structure",
-          url: "#",
-        },
-      ],
-    },
-  ],
-};
+import { signOut } from "firebase/auth";
+import { auth } from "@/config/firebase";
+import { useNavigate } from "react-router-dom";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const router = useNavigate();
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -91,7 +73,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               MekYu Account
             </SidebarMenuButton>
 
-            <SidebarMenuButton size={"lg"} className="cursor-pointer">
+            <SidebarMenuButton
+              onClick={() => {
+                signOut(auth)
+                router("/auth")
+              }}
+              size={"lg"}
+              className="cursor-pointer"
+            >
               <LogOut /> <span>Logout</span>
             </SidebarMenuButton>
           </SidebarMenu>

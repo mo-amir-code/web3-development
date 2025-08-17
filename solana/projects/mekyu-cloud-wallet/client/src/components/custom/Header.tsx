@@ -11,28 +11,30 @@ const Header = () => {
   return (
     <header className="flex items-center justify-between py-2 px-4">
       {/* logo */}
-      <div></div>
+      <div className="flex-1 md:block hidden"></div>
 
       {/* Tabs */}
-      <div className="border rounded-lg p-1 space-x-1">
-        <ButtonWithIcon
-          name="Wallet"
-          handleOnClick={() => setTab("wallet")}
-          isSelected={tab === "wallet"}
-        >
-          <Wallet />
-        </ButtonWithIcon>
-        <ButtonWithIcon
-          name="Apps"
-          handleOnClick={() => setTab("app")}
-          isSelected={tab === "app"}
-        >
-          <LayoutGrid />
-        </ButtonWithIcon>
+      <div className="flex-1 flex items-center justify-center" >
+        <div className="border rounded-lg p-1 space-x-1">
+          <ButtonWithIcon
+            name="Wallet"
+            handleOnClick={() => setTab("wallet")}
+            isSelected={tab === "wallet"}
+          >
+            <Wallet />
+          </ButtonWithIcon>
+          <ButtonWithIcon
+            name="Apps"
+            handleOnClick={() => setTab("app")}
+            isSelected={tab === "app"}
+          >
+            <LayoutGrid />
+          </ButtonWithIcon>
+        </div>
       </div>
 
       {/* Profile & Wallet */}
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex-1 flex items-center justify-end gap-2">
         <div className="bg-sidebar px-3 py-2 shadow-sm cursor-pointer rounded-md">
           <Wallet className="text-blue-500" />
         </div>
