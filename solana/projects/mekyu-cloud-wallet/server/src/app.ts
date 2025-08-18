@@ -1,12 +1,17 @@
 import express from "express";
+import "dotenv/config";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./services/errorHandling/index.js";
 import apiRoutes from "./routes/index.js";
 import morgan from "morgan";
-import { WHITELISTED_ORIGINS } from "./config/constants.js";
+import { PrismaClient } from "@prisma/client";
+
+// import { WHITELISTED_ORIGINS } from "./config/constants.js";
 
 const app = express();
+
+export const prisma = new PrismaClient();
 
 // To keep server live on the onrender server
 app.get("/ping", (_req, res) => {
@@ -15,13 +20,14 @@ app.get("/ping", (_req, res) => {
 
 app.use(
   cors({
-    origin: function (origin: any, callback: any) {
-      if (WHITELISTED_ORIGINS.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error("You are very chalak bro....."));
-      }
-    },
+    // origin: function (origin: any, callback: any) {
+    //   if (WHITELISTED_ORIGINS.indexOf(origin) !== -1) {
+    //     callback(null, true);
+    //   } else {
+    //     callback(new Error("You are very chalak bro....."));
+    //   }
+    // },
+    origin: "*",
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],

@@ -28,10 +28,15 @@ const isUserAuthenticated = apiHandler(async (req, res, next) => {
 
   try {
     const userData = await validateFirebaseToken(idToken);
+    const user = {
+      uId: userData.uid,
+      email: userData.email
+    };
+    console.log("User is here: ", user);
     // Attach user data to the request object for use in routes
-    (req as any).user = userData;
+    (req as any).user = user;
     next();
-  } catch {
+  } catch{
     next(
       new ErrorHandlerClass(
         "Invalid or expired token",

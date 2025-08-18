@@ -1,24 +1,25 @@
 import { NextFunction, Request, Response } from "express";
-import { AnyZodObject } from "zod";
+import { ZodObject } from "zod";
 import { ErrorHandlerClass } from "../errorHandling/index.js";
 import { BAD_REQUEST_STATUS_CODE } from "../../utils/constants/common.js";
 
-
-const zodValidation = (schema: AnyZodObject) => async (req: Request, res: Response, next: NextFunction) => {
+const zodValidation =
+  (schema: ZodObject) =>
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await schema.parseAsync({
-            body: req.body,
-            query: req.query,
-            params: req.params,
-            cookies: req.cookies
-        })
-        return next();
+      await schema.parseAsync({
+        body: req.body,
+        query: req.query,
+        params: req.params,
+        cookies: req.cookies,
+      });
+      return next();
     } catch (error: any) {
-        const msgs = JSON.parse(error?.message);
-        return next(new ErrorHandlerClass(msgs[0]?.message, BAD_REQUEST_STATUS_CODE));
+      const msgs = JSON.parse(error?.message);
+      return next(
+        new ErrorHandlerClass(msgs[0]?.message, BAD_REQUEST_STATUS_CODE)
+      );
     }
-}
+  };
 
-export {
-    zodValidation
-}
+export { zodValidation };

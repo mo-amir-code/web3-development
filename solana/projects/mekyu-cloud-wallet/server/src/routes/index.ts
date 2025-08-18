@@ -1,8 +1,13 @@
 import express from "express";
-import v1Routes from "./v1/index.js";
+import userRoutes from "./user.routes.js"
+import walletRoutes from "./wallet.routes.js"
+import transactionRoutes from "./transaction.routes.js"
+import { isUserAuthenticated } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.use("/api/v1", v1Routes);
+router.use("/api/user", isUserAuthenticated, userRoutes);
+router.use("/api/wallet", isUserAuthenticated, walletRoutes);
+router.use("/api/transaction", isUserAuthenticated, transactionRoutes);
 
 export default router;

@@ -1,19 +1,17 @@
 import admin from "firebase-admin";
-import { getAuth } from "firebase-admin/auth";
-import { FIREBASE_API_KEY_PATH } from "../../config/constants.js";
-const serviceAccount = require(FIREBASE_API_KEY_PATH!);
+import { DecodedIdToken, getAuth } from "firebase-admin/auth";
 
 const app = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.applicationDefault(),
 });
 
 const auth = getAuth(app);
 
-const validateFirebaseToken = async (idToken: string) => {
+const validateFirebaseToken = async (idToken: string): Promise<DecodedIdToken> => {
   try {
     const decoded = await auth.verifyIdToken(idToken);
     return decoded;
-  } catch {
+  } catch(error:any) {
     throw new Error("Invalid or expired token");
   }
 };
