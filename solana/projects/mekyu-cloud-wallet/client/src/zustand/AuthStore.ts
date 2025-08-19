@@ -1,4 +1,8 @@
-import type { AuthStoreActions, AuthStoreState, ManualUserType } from "@/types/zustand";
+import type {
+  AuthStoreActions,
+  AuthStoreState,
+  ManualUserType,
+} from "@/types/zustand";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
@@ -18,7 +22,7 @@ const useAuthStore = create<AuthStoreState & AuthStoreActions>()(
     setUserInfo: (userInfo: ManualUserType | null) =>
       set((state) => {
         state.userInfo = userInfo;
-      }),
+      })
   }))
 );
 

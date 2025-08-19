@@ -4,9 +4,11 @@ import { z } from "zod";
 const TransactionModeType = z.enum(["mail", "address"]); // adjust as needed
 
 export const SendTransactionZodSchema = z.object({
-  tokenMintAddress: z.string(),
-  toPubKey: z.string().nullable(),
-  amount: z.number(),
-  email: z.email().optional(),
-  mode: TransactionModeType,
+  body: z.object({
+    tokenMintAddress: z.string(),
+    toPubKey: z.string().nullable(),
+    amount: z.number(),
+    email: z.email().optional(),
+    mode: TransactionModeType,
+  }),
 });

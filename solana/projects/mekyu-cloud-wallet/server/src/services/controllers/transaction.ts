@@ -5,7 +5,13 @@ import {
   Transaction,
 } from "@solana/web3.js";
 import { SendTransactionType } from "../../types/controllers/transaction.js";
-import { getOrCreateAssociatedTokenAccount, transfer } from "@solana/spl-token";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  createTransferInstruction,
+  // getMint,
+  getOrCreateAssociatedTokenAccount,
+  TOKEN_2022_PROGRAM_ID,
+} from "@solana/spl-token";
 import { connection } from "../../config/solana.js";
 import { privateKeyBase58ToUint8Array } from "./wallet.js";
 
@@ -23,6 +29,14 @@ const sendTransaction = async ({
   const toAddress = new PublicKey(toPubKey!);
   const sender = Keypair.fromSecretKey(privateKeyBase58ToUint8Array(secretKey));
 
+  // const mintInfo = await getMint(
+  //   connection,
+  //   tokenAddress,
+  //   "confirmed",
+  //   TOKEN_2022_PROGRAM_ID
+  // );
+  // console.log("Mint ", mintInfo);
+
   let transaction = new Transaction();
   let signature: string | null = null;
 
@@ -34,40 +48,78 @@ const sendTransaction = async ({
         lamports: amount,
       })
     );
-
-    transaction.feePayer = sender.publicKey;
-    transaction.recentBlockhash = (
-      await connection.getLatestBlockhash()
-    ).blockhash;
-    transaction.sign(sender);
-
-    const rawTransaction = transaction.serialize();
-
-    signature = await connection.sendRawTransaction(rawTransaction);
   } else {
+
     const sendTokenAccount = await getOrCreateAssociatedTokenAccount(
       connection,
       sender,
       tokenAddress,
-      sender.publicKey
+      sender.publicKey,
+      false,
+      "confirmed",
+      {
+        maxRetries: 2,
+        skipPreflight: true,
+      },
+      TOKEN_2022_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
     );
+
     const receiverTokenAccount = await getOrCreateAssociatedTokenAccount(
       connection,
       sender,
       tokenAddress,
-      toAddress
+      toAddress,
+      false,
+      "confirmed",
+      {
+        maxRetries: 2,
+        skipPreflight: true,
+      },
+      TOKEN_2022_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
-    signature = await transfer(
-      connection,
-      sender,
+    const tIns = createTransferInstruction(
       sendTokenAccount.address,
       receiverTokenAccount.address,
-      sender,
-      amount
+      sender.publicKey,
+      amount,
+      [],
+      TOKEN_2022_PROGRAM_ID
+    );
+
+    // signature = await transfer(
+    //   connection,
+    //   sender,
+    //   sendTokenAccount.address,
+    //   receiverTokenAccount.address,
+    //   sender,
+    //   amount,
+    //   [],
+    //   {
+    //     maxRetries: 2,
+    //     skipPreflight: true,
+    //   },
+    //   TOKEN_2022_PROGRAM_ID
+    // );
+
+
+    transaction.add(
+      tIns
     );
   }
 
+  transaction.feePayer = sender.publicKey;
+  transaction.recentBlockhash = (
+    await connection.getLatestBlockhash()
+  ).blockhash;
+  transaction.sign(sender);
+
+  const rawTransaction = transaction.serialize();
+
+  signature = await connection.sendRawTransaction(rawTransaction);
+  
   return signature;
 };
 

@@ -1,16 +1,34 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { Header } from "@/components/custom";
+import Loader from "@/components/custom/Loader";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/config/firebase";
+import { httpAxios } from "@/lib/axios";
+import { handleToGetKey } from "@/lib/queries";
 import type { Props } from "@/types/layouts";
 import type { ManualUserType } from "@/types/zustand";
 import { useAuthStore } from "@/zustand/AuthStore";
+import { useUserStore } from "@/zustand/UserStore";
+import { useMutation } from "@tanstack/react-query";
 import { onAuthStateChanged, type User } from "firebase/auth";
-import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Fragment, useEffect, useState } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { Connection } from "@solana/web3.js";
+import { SOLANA_CHAIN } from "@/config";
 
 const HomeLayout: React.FC<Props> = () => {
-  const { setUserInfo, setUserStatus } = useAuthStore();
+  const [isAuthChecked, setIsAuthChecked] = useState<boolean>(false);
+  const { setUserInfo, setUserStatus, userInfo, isUserLoggedIn } =
+    useAuthStore();
+  const { setPubKey, setConnection } = useUserStore();
+  const router = useNavigate();
+
+  const mutateWallet = useMutation({
+    mutationFn: handleToGetKey,
+    onSuccess: (res) => {
+      setPubKey(res.data.data.key);
+    },
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
@@ -31,21 +49,47 @@ const HomeLayout: React.FC<Props> = () => {
           setUserInfo(null);
           setUserStatus(false);
         }
+
+        setIsAuthChecked(true);
       }
     );
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (userInfo) {
+      httpAxios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${userInfo.idToken}`;
+      mutateWallet.mutate(0);
+    }
+  }, [userInfo]);
+
+  useEffect(() => {
+    const connection = new Connection(SOLANA_CHAIN);
+    setConnection(connection);
+  }, []);
+
+  useEffect(() => {
+    if (isAuthChecked && !isUserLoggedIn) {
+      router("/auth");
+    }
+  }, [isAuthChecked, isUserLoggedIn, router]);
+
+  if (!isAuthChecked) return <Loader />;
+
   return (
-    <SidebarProvider defaultOpen={false}>
-      <AppSidebar />
-      <SidebarInset>
-        <Header />
-        <main className="w-full">
-          <Outlet />
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+    <Fragment>
+      <SidebarProvider defaultOpen={false}>
+        <AppSidebar />
+        <SidebarInset>
+          <Header />
+          <main className="w-full">
+            <Outlet />
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </Fragment>
   );
 };
 

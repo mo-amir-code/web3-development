@@ -4,9 +4,102 @@ import { Button } from "@/components/ui/button";
 import ButtonWithIcon from "@/components/ui/ButtonWithIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TypographyH2, TypographyP } from "@/components/ui/typography";
+import { ENVIRONMENT } from "@/config/secrets";
+import {
+  handleToGetTokenBalances,
+  handleToGetTotalBalance,
+} from "@/lib/queries";
+import type { TokenMetadataType } from "@/types/components";
+import { useAppStore } from "@/zustand/AppStore";
+import { useAuthStore } from "@/zustand/AuthStore";
+import { useUserStore } from "@/zustand/UserStore";
+import axios from "axios";
 import { RectangleEllipsis, Wallet as WalletIcon } from "lucide-react";
+import { memo, useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const Wallet = () => {
+  const [balance, setBalance] = useState<string | null>(null);
+  const { userInfo } = useAuthStore();
+  const { wallet, connection } = useUserStore();
+  const { setTokens } = useAppStore();
+
+  const handleToCopyPublicKey = useCallback(async () => {
+    if (!wallet) {
+      toast.error("Something went wrong!");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(wallet.publicKey);
+      toast.success("Wallet address copied");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error occurred while copyin text");
+    }
+  }, [wallet, toast]);
+
+  const handleToFetchTokens = useCallback(async () => {
+    const chainId = ENVIRONMENT === "development" ? 3 : 1;
+    try {
+      const res = await axios.post(
+        `https://api.phantom.app/tokens/v1?isSolCompressedTokensEnabled=true`,
+        {
+          addresses: [
+            {
+              address: "2rZ7kKwVUDLwGgBJCYzHkcJXunPSnsVLL9hbBhb1Nnwn",
+              chainId: `solana:10${chainId}`,
+            },
+          ],
+        }
+      );
+
+      let tokens: TokenMetadataType[] = res?.data?.tokens?.map((t: any) => {
+        return {
+          type: t.type,
+          amount: t.data.amount,
+          decimals: t.data.decimals,
+          logoUri: t.data.logoUri,
+          name: t.data.name,
+          symbol: t.data.symbol,
+          mintAddress: t.data?.mintAddress || null,
+          programId: t.data?.programId || null,
+        };
+      });
+
+      if (ENVIRONMENT !== "development") {
+        const balanceObj: {
+          walletAddress: string;
+          chainId: 1 | 3;
+        } = {
+          walletAddress: wallet?.publicKey!,
+          chainId: 1,
+        };
+
+        const balance = await handleToGetTotalBalance(balanceObj);
+        setBalance(balance?.data?.totalValueUsdStringCurrent || "0.00");
+
+        const balances = await handleToGetTokenBalances(balanceObj);
+
+        tokens =
+          balances?.data?.items?.map((t: any, idx: number) => {
+            return {
+              ...tokens[idx],
+              price: t?.price?.price || null,
+            };
+          }) || tokens;
+      }
+
+      setTokens(tokens);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [wallet, ENVIRONMENT]);
+
+  useEffect(() => {
+    if (connection && wallet) handleToFetchTokens();
+  }, [connection, wallet]);
+
   return (
     <section className="w-full rounded-lg min-h-[35rem] shadow-lg bg-primary-foreground/30">
       {/* User Profile Information */}
@@ -15,15 +108,14 @@ const Wallet = () => {
         <div className="flex items-center gap-4">
           {/* Avatara */}
           <Avatar className="w-20 h-20">
-            <AvatarImage
-              src="https://media.licdn.com/dms/image/v2/D5635AQEIw2oJ1UZqXA/profile-framedphoto-shrink_400_400/B56ZT_UyfrGsAg-/0/1739450427661?e=1755950400&v=beta&t=zzKWu1AW4uUQTLDT2JeZeWTWYR_cKhMxXXyLBc-SHeM"
-              alt="mekyu"
-            />
-            <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+            <AvatarImage src={userInfo?.photoURL!} alt="mekyu" />
+            <AvatarFallback className="rounded-lg">
+              {userInfo?.name?.split(" ")[0]}
+            </AvatarFallback>
           </Avatar>
 
           <TypographyH2
-            content="Welcome back, Mo!"
+            content={`Welcome back, ${userInfo?.name?.split(" ")[0]}!`}
             className="text-shadow-foreground"
           />
         </div>
@@ -49,7 +141,7 @@ const Wallet = () => {
             <div className="flex-1 flex items-end gap-1">
               <span>
                 <TypographyP
-                  content={`$0.00`}
+                  content={`$${balance ?? "-"}`}
                   className="text-7xl font-semibold"
                 />
               </span>
@@ -65,7 +157,8 @@ const Wallet = () => {
             <div>
               <ButtonWithIcon
                 name="Your Wallet Address"
-                className="bg-muted-foreground/5 rounded-full text-muted-foreground"
+                handleOnClick={() => handleToCopyPublicKey()}
+                className="bg-muted-foreground/5 cursor-pointer rounded-full text-muted-foreground"
               >
                 <RectangleEllipsis />
               </ButtonWithIcon>
@@ -88,13 +181,13 @@ const Wallet = () => {
         <Tabs defaultValue="tokens" className="w-full">
           <TabsList>
             <TabsTrigger value="tokens">Tokens</TabsTrigger>
-            <TabsTrigger value="nfts">NFTs</TabsTrigger>
+            {/* <TabsTrigger value="nfts">NFTs</TabsTrigger> */}
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
           <TabsContent value="tokens">
             <Tokens />
           </TabsContent>
-          <TabsContent value="nfts">Change your password here.</TabsContent>
+          {/* <TabsContent value="nfts">Change your password here.</TabsContent> */}
           <TabsContent value="activity">
             <Activity />
           </TabsContent>
@@ -104,4 +197,4 @@ const Wallet = () => {
   );
 };
 
-export default Wallet;
+export default memo(Wallet);

@@ -11,6 +11,7 @@ const WHITELISTED_ORIGINS = [CLIENT_ORIGIN];
 
 const SOLANA_MAINNET = `https://solana-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`
 const SOLANA_DEVNET = `https://solana-devnet.g.alchemy.com/v2/${ALCHEMY_KEY}`
+// const SOLANA_DEVNET = `https://api.devnet.solana.com`
 
 export {
   APP_PORT,

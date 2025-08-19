@@ -1,6 +1,4 @@
-import * as React from "react";
-import { Cog, Files, GalleryVerticalEnd, LogOut, Wallet } from "lucide-react";
-
+import { Cog, LogOut, ScanQrCode, Wallet } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,9 +15,30 @@ import ButtonWithIcon from "./ui/ButtonWithIcon";
 import { signOut } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/zustand/AuthStore";
+import { useUserStore } from "@/zustand/UserStore";
+import { useCallback } from "react";
+import toast from "react-hot-toast";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useNavigate();
+  const { userInfo } = useAuthStore();
+  const { wallet } = useUserStore();
+
+  const handleToCopyPublicKey = useCallback(async () => {
+    if (!wallet) {
+      toast.error("Something went wrong!");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(wallet.publicKey);
+      toast.success("Wallet address copied");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error occurred while copyin text");
+    }
+  }, [wallet, toast]);
 
   return (
     <Sidebar {...props}>
@@ -30,36 +49,60 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={"#"} alt={"demo"} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage
+                  src={userInfo?.photoURL || "#"}
+                  alt={userInfo?.name || "MekYu"}
+                />
+                <AvatarFallback className="rounded-lg">MekYu</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{"MekYu"}</span>
+                <span className="truncate font-medium">{userInfo?.name}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  mo.amir.code@gmail.com
+                  {userInfo?.email || "loading..."}
                 </span>
               </div>
-              <Cog className="ml-auto size-4" />
+
+              <button
+                onClick={() => toast.error("Setting is not initialized yet")}
+                className="cursor-pointer"
+              >
+                <Cog className="ml-auto size-4" />
+              </button>
             </SidebarMenuButton>
 
             <SidebarMenuButton
               size={"lg"}
               className="flex items-center gap-1.5"
             >
-              <ButtonWithIcon name="Wallet Address" className="flex-1">
+              <ButtonWithIcon
+                handleOnClick={() => handleToCopyPublicKey()}
+                name="Wallet Address"
+                className="flex-1"
+              >
                 <Wallet />
               </ButtonWithIcon>
-              <ButtonWithIcon name="Copy Address" className="flex-1">
-                <Files />
+              <ButtonWithIcon
+                handleOnClick={() => {
+                  window.open(
+                    `https://solscan.io/account/${
+                      wallet?.publicKey || "error"
+                    }`,
+                    "_blank"
+                  );
+                }}
+                name="See on SolScan"
+                className="flex-1"
+              >
+                <ScanQrCode />
               </ButtonWithIcon>
             </SidebarMenuButton>
 
-            <SidebarMenuButton>
+            {/* <SidebarMenuButton>
               <ButtonWithIcon name="Connect Wallet" className="flex-1">
                 <Wallet />
               </ButtonWithIcon>
-            </SidebarMenuButton>
+            </SidebarMenuButton> */}
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -75,8 +118,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
             <SidebarMenuButton
               onClick={() => {
-                signOut(auth)
-                router("/auth")
+                signOut(auth);
+                router("/auth");
               }}
               size={"lg"}
               className="cursor-pointer"

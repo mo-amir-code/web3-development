@@ -5,3 +5,6 @@ export const FIREBASE_STORAGE_BUCKET = import.meta.env.VITE_FIREBASE_STORAGE_BUC
 export const FIREBASE_MESSAGING_SENDER_ID = import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID;
 export const FIREBASE_APP_ID = import.meta.env.VITE_FIREBASE_APP_ID;
 export const FIREBASE_MEASUREMENT_ID = import.meta.env.VITE_FIREBASE_MEASUREMENT_ID;
+export const SERVER_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL;
+export const ALCHEMY_KEY = import.meta.env.VITE_ALCHEMY_KEY;
+export const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT;

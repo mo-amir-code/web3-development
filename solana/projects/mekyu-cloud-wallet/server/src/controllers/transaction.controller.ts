@@ -13,20 +13,17 @@ import { SendTransactionBodyType } from "../types/controllers/transaction.js";
 import { BAD_REQUEST_STATUS_CODE } from "../utils/constants/common.js";
 
 const getTransactionById = apiHandler(async (req, res, next) => {
-  const tId = parseInt(req.params.id) as number | null;
+  const sig: string | null = req.params.id || null;
 
-  if (!tId) {
+  if (!sig) {
     return next(
-      new ErrorHandlerClass(
-        "Transaction ID is missing",
-        BAD_REQUEST_STATUS_CODE
-      )
+      new ErrorHandlerClass("Signature is missing", BAD_REQUEST_STATUS_CODE)
     );
   }
 
   const txn = await prisma.transaction.findFirst({
     where: {
-      id: tId,
+      signature: sig,
     },
   });
 
@@ -42,7 +39,10 @@ const getTransactionById = apiHandler(async (req, res, next) => {
   return ok({
     res,
     data: {
-      transaction: txn,
+      transaction: {
+        ...txn,
+        amount: txn.amount.toString(),
+      },
     },
     message: "Transaction found",
   });
@@ -57,10 +57,22 @@ const getTransactions = apiHandler(async (req, res, next) => {
     },
   });
 
-  const txns = await prisma.transaction.findMany({
+  let txns = await prisma.transaction.findMany({
     where: {
       walletId: wallet?.id!,
     },
+  });
+
+  txns = txns.map((txn) => {
+    const t = JSON.parse(
+      JSON.stringify(txn, (_key, value) =>
+        typeof value === "bigint" ? value.toString() : value
+      )
+    );
+    return {
+      ...t,
+      amount: t.amount.toString(),
+    };
   });
 
   return ok({
@@ -73,6 +85,7 @@ const getTransactions = apiHandler(async (req, res, next) => {
 });
 
 const sendTransactionOnChain = apiHandler(async (req, res, next) => {
+  // console.log("from on chain");
   const tokenData = req.user;
   const data = req.body as SendTransactionBodyType;
 

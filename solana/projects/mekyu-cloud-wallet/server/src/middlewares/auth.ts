@@ -32,7 +32,6 @@ const isUserAuthenticated = apiHandler(async (req, res, next) => {
       uId: userData.uid,
       email: userData.email
     };
-    console.log("User is here: ", user);
     // Attach user data to the request object for use in routes
     (req as any).user = user;
     next();

@@ -8,7 +8,7 @@ import { BAD_REQUEST_STATUS_CODE } from "../utils/constants/common.js";
 
 const getWalletKeys = apiHandler(async (req, res, next) => {
   const tokenData = req.user;
-  const pId = req.params.id || 0;
+  const pId = parseInt(req.params.id) || 0;
 
   const wallet = await prisma.wallet.findFirst({
     where: {
