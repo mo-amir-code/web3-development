@@ -24,6 +24,7 @@ import { Link, useNavigate } from "react-router-dom";
 import type { ManualUserType } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 import { handleToAuth } from "@/lib/queries";
+import { httpAxios } from "@/lib/axios";
 
 export function LoginForm({
   className,
@@ -52,9 +53,12 @@ export function LoginForm({
 
       setUserInfo(userInfo);
       setUserStatus(true);
+      httpAxios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${userInfo.idToken}`;
       mutateAuth.mutate();
     },
-    [setUserInfo, setUserStatus, mutateAuth, toast, router]
+    [setUserInfo, setUserStatus, mutateAuth, toast, router, httpAxios]
   );
 
   const handleGoogleAuth = useCallback(async () => {
