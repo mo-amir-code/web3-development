@@ -10,8 +10,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DB_URI")
+  provider  = "postgresql"
+  url       = env("DB_URL")
+  directUrl = env("DIRECT_DB_URL")
 }
 
 // ENUMS
@@ -24,7 +25,7 @@ enum Status {
 // Tables
 
 model User {
-  uId       String @unique
+  uId       String   @unique
   email     String   @unique @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

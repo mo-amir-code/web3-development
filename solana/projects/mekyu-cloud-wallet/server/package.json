@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm prisma:generate && nodemon  dist/server.js",
-    "start": "npm run prisma:generate && node  dist/server.js",
-    "build": "tsc",
+    "start": "node dist/server.js",
+    "build": "tsc && pnpm prisma:generate && pnpm prisma:push",
     "watch": "tsc --watch",
     "prisma:generate": "npx prisma generate",
     "prisma:push": "npx prisma db push"
