@@ -3,7 +3,8 @@ type TransactionModeType = "mail" | "address";
 type SendTransactionType = {
   tokenMintAddress: string;
   toPubKey: string | null;
-  amount: number;
+  amount: bigint | string;
+  programId: string | null;
 };
 
 type SendTransactionBodyType = {

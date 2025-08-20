@@ -7,8 +7,9 @@ export const SendTransactionZodSchema = z.object({
   body: z.object({
     tokenMintAddress: z.string(),
     toPubKey: z.string().nullable(),
-    amount: z.number(),
+    amount: z.string(),
     email: z.email().optional(),
     mode: TransactionModeType,
+    programId: z.string().nullable(),
   }),
 });

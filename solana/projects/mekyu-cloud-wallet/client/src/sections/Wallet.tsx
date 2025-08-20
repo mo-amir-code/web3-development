@@ -1,28 +1,32 @@
-import { Activity, Tokens } from "@/components/custom/wallet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import ButtonWithIcon from "@/components/ui/ButtonWithIcon";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TypographyH2, TypographyP } from "@/components/ui/typography";
 import { ENVIRONMENT } from "@/config/secrets";
 import {
   handleToGetTokenBalances,
+  handleToGetTokensInformation,
   handleToGetTotalBalance,
 } from "@/lib/queries";
 import type { TokenMetadataType } from "@/types/components";
 import { useAppStore } from "@/zustand/AppStore";
 import { useAuthStore } from "@/zustand/AuthStore";
 import { useUserStore } from "@/zustand/UserStore";
-import axios from "axios";
 import { RectangleEllipsis, Wallet as WalletIcon } from "lucide-react";
 import { memo, useCallback, useEffect, useState } from "react";
+import { Activity, Tokens } from "@/components/custom/wallet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import toast from "react-hot-toast";
+import Transfer from "./Transfer";
+import Receive from "./Receive";
+import AnimatedModalDemo from "@/components/ui/Modal";
+import TransactionStatus from "./TransactionStatus";
 
 const Wallet = () => {
   const [balance, setBalance] = useState<string | null>(null);
   const { userInfo } = useAuthStore();
   const { wallet, connection } = useUserStore();
-  const { setTokens } = useAppStore();
+  const { setTokens, setMode, mode } = useAppStore();
 
   const handleToCopyPublicKey = useCallback(async () => {
     if (!wallet) {
@@ -40,19 +44,17 @@ const Wallet = () => {
   }, [wallet, toast]);
 
   const handleToFetchTokens = useCallback(async () => {
+    if (!wallet?.publicKey) {
+      toast.error("Something went wrong!");
+      return;
+    }
+
     const chainId = ENVIRONMENT === "development" ? 3 : 1;
     try {
-      const res = await axios.post(
-        `https://api.phantom.app/tokens/v1?isSolCompressedTokensEnabled=true`,
-        {
-          addresses: [
-            {
-              address: "2rZ7kKwVUDLwGgBJCYzHkcJXunPSnsVLL9hbBhb1Nnwn",
-              chainId: `solana:10${chainId}`,
-            },
-          ],
-        }
-      );
+      const res = await handleToGetTokensInformation({
+        chainId,
+        walletAddress: wallet?.publicKey,
+      });
 
       let tokens: TokenMetadataType[] = res?.data?.tokens?.map((t: any) => {
         return {
@@ -101,7 +103,7 @@ const Wallet = () => {
   }, [connection, wallet]);
 
   return (
-    <section className="w-full rounded-lg min-h-[35rem] shadow-lg bg-primary-foreground/30">
+    <div className="w-full rounded-lg min-h-[35rem] shadow-lg bg-primary-foreground/30">
       {/* User Profile Information */}
       <div className="p-8 rounded-lg bg-primary-foreground shadow-lg space-y-7">
         {/* Profile */}
@@ -167,32 +169,51 @@ const Wallet = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
-            <Button className="flex-1 cursor-pointer">Send</Button>
-            <Button className="flex-1 cursor-pointer" variant={"outline"}>
-              Receive
+            <Button
+              onClick={() => setMode("send")}
+              className="flex-1 cursor-pointer"
+            >
+              Send
             </Button>
+            <AnimatedModalDemo name="Receive">
+              <Receive />
+            </AnimatedModalDemo>
+            <AnimatedModalDemo name="Txn. Status">
+              <TransactionStatus />
+            </AnimatedModalDemo>
             {/* <Button className="flex-1" variant={"outline"} >Send</Button> */}
           </div>
         </div>
       </div>
 
       {/* User's Wallet Data */}
-      <div className="p-6">
-        <Tabs defaultValue="tokens" className="w-full">
-          <TabsList>
-            <TabsTrigger value="tokens">Tokens</TabsTrigger>
-            {/* <TabsTrigger value="nfts">NFTs</TabsTrigger> */}
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-          </TabsList>
-          <TabsContent value="tokens">
-            <Tokens />
-          </TabsContent>
-          {/* <TabsContent value="nfts">Change your password here.</TabsContent> */}
-          <TabsContent value="activity">
-            <Activity />
-          </TabsContent>
-        </Tabs>
-      </div>
+      {(() => {
+        switch (mode) {
+          case "send":
+            return <Transfer />;
+          default:
+            return <WalletData />;
+        }
+      })()}
+    </div>
+  );
+};
+
+const WalletData = () => {
+  return (
+    <section className="p-6">
+      <Tabs defaultValue="tokens" className="w-full">
+        <TabsList>
+          <TabsTrigger value="tokens">Tokens</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
+        </TabsList>
+        <TabsContent value="tokens">
+          <Tokens />
+        </TabsContent>
+        <TabsContent value="activity">
+          <Activity />
+        </TabsContent>
+      </Tabs>
     </section>
   );
 };

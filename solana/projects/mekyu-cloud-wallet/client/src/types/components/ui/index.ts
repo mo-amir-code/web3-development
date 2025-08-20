@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 
 
 type TypographyType = {
@@ -6,6 +7,15 @@ type TypographyType = {
 }
 
 
+type ModalType = {
+    name: string | ReactNode
+    children: ReactNode
+    className?: string
+    ref?: React.RefObject<HTMLDivElement>
+}
+
+
 export type {
-    TypographyType
+    TypographyType,
+    ModalType
 }

@@ -30,7 +30,7 @@ export const Token: React.FC<TokenMetadataType> = (token) => {
   return (
     <div className="flex items-center p-4 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer gap-2">
       <Avatar className="w-16 h-16">
-        <AvatarImage src={logoUri || "#"} alt="mekyu" />
+        <AvatarImage src={logoUri || "/question-mark.jpg"} alt="mekyu" />
         <AvatarFallback className="rounded-lg">MekYu</AvatarFallback>
       </Avatar>
 

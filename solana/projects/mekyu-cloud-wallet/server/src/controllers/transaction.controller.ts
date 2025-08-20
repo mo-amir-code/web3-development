@@ -126,12 +126,13 @@ const sendTransactionOnChain = apiHandler(async (req, res, next) => {
     toPubKey: data.toPubKey,
     secretKey: wallet?.privateKey!,
     tokenMintAddress: data.tokenMintAddress,
+    programId: data.programId,
   };
   const signature = await sendTransaction(txnBody);
 
   await prisma.transaction.create({
     data: {
-      amount: data.amount,
+      amount: BigInt(data.amount),
       fromPubKey: wallet?.publicKey!,
       signature,
       tokenMint: data.tokenMintAddress,

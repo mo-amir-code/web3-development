@@ -1,17 +1,20 @@
 // import type { AuthUserType } from "../components";
 
-import type { TokenMetadataType } from "../components";
+import type { TokenMetadataType } from "./components";
 
 type TabType = "wallet" | "app";
+type ModeType = "default" | "send" | "transaction";
 
 type AppStoreState = {
   tab: TabType;
   tokens: TokenMetadataType[];
+  mode: ModeType
 };
 
 type AppStoreActions = {
   setTab: (tab: TabType) => void;
   setTokens: (tokens: TokenMetadataType[]) => void;
+  setMode: (mode: ModeType) => void;
 };
 
 type ManualUserType = {
@@ -60,4 +63,5 @@ export type {
   WalletType,
   UserStoreAction,
   UserStoreState,
+  ModeType
 };

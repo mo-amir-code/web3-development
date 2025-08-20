@@ -21,9 +21,17 @@ type TokenMetadataType = {
   decimals: number;
   logoUri: string | null;
   type: TokenType;
-  programId?: string;
+  programId: string | null;
   mintAddress?: string;
   price?: number;
 };
 
-export type { AuthUserType, AuthResponseType, TokenType, TokenMetadataType };
+type AlertDialogType = {
+  name: string;
+  title: string;
+  description: string;
+  handleResponse: Function;
+  ref?: React.RefObject<HTMLDivElement>
+};
+
+export type { AuthUserType, AuthResponseType, TokenType, TokenMetadataType, AlertDialogType };

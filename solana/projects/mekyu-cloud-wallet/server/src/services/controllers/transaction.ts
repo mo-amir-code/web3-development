@@ -25,6 +25,7 @@ const sendTransaction = async ({
   tokenMintAddress,
   secretKey,
 }: SendTransactionMethodType): Promise<string> => {
+  amount = amount as bigint;
   const tokenAddress = new PublicKey(tokenMintAddress);
   const toAddress = new PublicKey(toPubKey!);
   const sender = Keypair.fromSecretKey(privateKeyBase58ToUint8Array(secretKey));
@@ -49,7 +50,6 @@ const sendTransaction = async ({
       })
     );
   } else {
-
     const sendTokenAccount = await getOrCreateAssociatedTokenAccount(
       connection,
       sender,
@@ -104,10 +104,7 @@ const sendTransaction = async ({
     //   TOKEN_2022_PROGRAM_ID
     // );
 
-
-    transaction.add(
-      tIns
-    );
+    transaction.add(tIns);
   }
 
   transaction.feePayer = sender.publicKey;
@@ -119,7 +116,7 @@ const sendTransaction = async ({
   const rawTransaction = transaction.serialize();
 
   signature = await connection.sendRawTransaction(rawTransaction);
-  
+
   return signature;
 };
 

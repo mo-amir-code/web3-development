@@ -1,4 +1,4 @@
-import type { UserStoreAction, UserStoreState } from "@/types/zustand";
+import type { UserStoreAction, UserStoreState } from "@/types";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 

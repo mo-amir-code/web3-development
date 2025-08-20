@@ -1,12 +1,12 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { Header } from "@/components/custom";
-import Loader from "@/components/custom/Loader";
+import { EntireScreenLoader } from "@/components/custom/Loader";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/config/firebase";
 import { httpAxios } from "@/lib/axios";
 import { handleToGetKey } from "@/lib/queries";
 import type { Props } from "@/types/layouts";
-import type { ManualUserType } from "@/types/zustand";
+import type { ManualUserType } from "@/types";
 import { useAuthStore } from "@/zustand/AuthStore";
 import { useUserStore } from "@/zustand/UserStore";
 import { useMutation } from "@tanstack/react-query";
@@ -76,7 +76,7 @@ const HomeLayout: React.FC<Props> = () => {
     }
   }, [isAuthChecked, isUserLoggedIn, router]);
 
-  if (!isAuthChecked) return <Loader />;
+  if (!isAuthChecked) return <EntireScreenLoader />;
 
   return (
     <Fragment>

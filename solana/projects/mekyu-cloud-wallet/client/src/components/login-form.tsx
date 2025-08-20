@@ -21,7 +21,7 @@ import {
 import { auth } from "@/config/firebase";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
-import type { ManualUserType } from "@/types/zustand";
+import type { ManualUserType } from "@/types";
 
 export function LoginForm({
   className,

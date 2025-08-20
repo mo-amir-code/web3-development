@@ -2,7 +2,7 @@ import type {
   AuthStoreActions,
   AuthStoreState,
   ManualUserType,
-} from "@/types/zustand";
+} from "@/types";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 

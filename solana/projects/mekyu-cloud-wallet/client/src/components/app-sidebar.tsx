@@ -17,13 +17,16 @@ import { auth } from "@/config/firebase";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/zustand/AuthStore";
 import { useUserStore } from "@/zustand/UserStore";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import toast from "react-hot-toast";
+import AnimatedModalDemo from "./ui/Modal";
+import { Secret } from "@/sections";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useNavigate();
   const { userInfo } = useAuthStore();
   const { wallet } = useUserStore();
+  const modalRef = useRef<any>(null);
 
   const handleToCopyPublicKey = useCallback(async () => {
     if (!wallet) {
@@ -63,12 +66,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </span>
               </div>
 
-              <button
-                onClick={() => toast.error("Setting is not initialized yet")}
-                className="cursor-pointer"
+              <AnimatedModalDemo
+                className="border-transparent"
+                name={<Cog className="ml-auto size-4" />}
+                ref={modalRef}
               >
-                <Cog className="ml-auto size-4" />
-              </button>
+                <Secret ref={modalRef} />
+              </AnimatedModalDemo>
             </SidebarMenuButton>
 
             <SidebarMenuButton

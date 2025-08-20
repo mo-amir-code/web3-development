@@ -8,3 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export function amountToToken(rawAmount: string | number, decimals: number): number {
   return Number(rawAmount) / Math.pow(10, decimals);
 }
+
+export function tokenToAmount(rawAmount: string | number, decimals: number): number {
+  return Number(rawAmount) * Math.pow(10, decimals);
+}
