@@ -22,6 +22,8 @@ import { auth } from "@/config/firebase";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import type { ManualUserType } from "@/types";
+import { useMutation } from "@tanstack/react-query";
+import { handleToAuth } from "@/lib/queries";
 
 export function LoginForm({
   className,
@@ -29,6 +31,13 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const { googleAuthProvider, setUserInfo, setUserStatus } = useAuthStore();
   const router = useNavigate();
+  const mutateAuth = useMutation({
+    mutationFn: handleToAuth,
+    onSuccess: (_res) => {
+      router("/");
+      toast.success("Authentication successfull");
+    },
+  });
 
   const handleAuth = useCallback(
     (res: UserCredential & any) => {
@@ -43,10 +52,9 @@ export function LoginForm({
 
       setUserInfo(userInfo);
       setUserStatus(true);
-      router("/");
-      toast.success("Authentication successfull");
+      mutateAuth.mutate();
     },
-    [toast, setUserInfo, setUserStatus, router]
+    [setUserInfo, setUserStatus, mutateAuth, toast, router]
   );
 
   const handleGoogleAuth = useCallback(async () => {

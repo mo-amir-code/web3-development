@@ -22,6 +22,10 @@ const handleToGetActivities = async () => {
   return await httpAxios.get(`/transaction`);
 };
 
+const handleToAuth = async () => {
+  return await httpAxios.post(`/user`);
+};
+
 const handleToGetTokenBalances = async ({
   chainId,
   walletAddress,
@@ -81,6 +85,7 @@ const handleToGetSingleTokenInformation = async ({
 export {
   handleToGetKey,
   handleToGetTokensInformation,
+  handleToAuth,
   handleToGetTokenBalances,
   handleToGetTotalBalance,
   handleToTransfer,
