@@ -17,9 +17,10 @@ const createUser = apiHandler(async (req, res, next) => {
   });
 
   if (isUser) {
-    return next(
-      new ErrorHandlerClass("User is already exist", BAD_REQUEST_STATUS_CODE)
-    );
+    return ok({
+      res,
+      message: "User logged in successfully",
+    });
   }
 
   const newWallet = createNewWallet();
