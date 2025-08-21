@@ -1,4 +1,4 @@
-import axios from "axios";
+// import axios from "axios";
 import { httpAxios } from "./axios";
 import type { SendTransactionTYpe } from "@/types/lib/queries";
 
