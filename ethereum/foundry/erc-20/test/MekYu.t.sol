@@ -2,23 +2,47 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MekYuCoin} from "../src/MekYu.sol";
+import { MekYuCoin } from "../src/MekYu.sol";
 
 contract MekYuTest is Test {
     MekYuCoin public mekyu;
 
     function setUp() public {
         mekyu = new MekYuCoin("MekYu", "Mek");
-        mekyu.setNumber(0);
     }
 
-    function test_Increment() public {
-        mekyu.increment();
-        assertEq(mekyu.number(), 1);
+    function test_Supply() public {
+        mekyu.mintTo(vm.addr(1), 10000);
+        assertEq(mekyu.totalSupply(), 10000);
+        assertEq(mekyu.balanceOf(vm.addr(1)), 10000);
     }
 
-    function testFuzz_SetNumber(uint256 x) public {
-        mekyu.setNumber(x);
-        assertEq(mekyu.number(), x);
+    function test_BalanceOf() public {
+        mekyu.mintTo(vm.addr(1), 10000);
+        vm.prank(vm.addr(1));
+        mekyu.transfer(vm.addr(2), 5000);
+        assertEq(mekyu.balanceOf(vm.addr(1)), 5000);
+        assertEq(mekyu.balanceOf(vm.addr(2)), 5000);
     }
+
+    function test_Allowance() public {
+        // Minting tokens to address 1
+        mekyu.mintTo(vm.addr(1), 10000);
+        // This will set next transaction will done by address 1
+        vm.prank(vm.addr(1));
+
+        // Approving 5000 tokens to address 2
+        mekyu.approve(vm.addr(2), 5000);
+        // It should be equal
+        assertEq(mekyu.allowance(vm.addr(1), vm.addr(2)), 5000);
+        // This will set next transaction will done by address 2
+        vm.prank(vm.addr(2));
+
+        // this method is transfering the tokens from the address 1 to address 3 and this transaction is initiating by address 2
+        mekyu.transferFrom(vm.addr(1), vm.addr(3), 5000);
+
+        // Balance of address 3 should be equal to 5000
+        assertEq(mekyu.balanceOf(vm.addr(3)), 5000);        
+    }
+
 }
