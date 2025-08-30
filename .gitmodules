@@ -1,0 +1,9 @@
+[submodule "ethereum/foundry/erc-20/lib/openzeppelin-contracts"]
+	path = ethereum/foundry/erc-20/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "ethereum/foundry/stake-emission/lib/forge-std"]
+	path = ethereum/foundry/stake-emission/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "ethereum/foundry/stake-emission/lib/openzeppelin-contracts"]
+	path = ethereum/foundry/stake-emission/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
