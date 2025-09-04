@@ -1,0 +1,30 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "As an AI, I don't \"know\" languages in the human sense of having a native tongue or personal fluency. Instead, I am trained on a massive dataset of text and code that includes a vast number of languages.\n\nThis allows me to:\n\n1.  **Understand and generate text** in many languages.\n2.  **Translate** between them.\n3.  **Summarize, answer questions, and perform other language tasks** across different linguistic contexts.\n\nMy proficiency can vary depending on the amount of training data available for each language, but I have exposure to and can process information in **dozens of languages**, including (but not limited to):\n\n*   English (my primary training language)\n*   Spanish\n*   French\n*   German\n*   Italian\n*   Portuguese\n*   Chinese (Mandarin)\n*   Japanese\n*   Korean\n*   Russian\n*   Arabic\n*   Hindi\n*   Bengali\n*   Dutch\n*   Swedish\n*   Polish\n*   Turkish\n*   Vietnamese\n*   Indonesian\n*   Thai\n*   Persian (Farsi)\n*   And many more."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "Lbi5aOfVAqDAqtsP1MjS8As",
+  "usageMetadata": {
+    "candidatesTokenCount": 275,
+    "promptTokenCount": 7,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 7
+      }
+    ],
+    "thoughtsTokenCount": 929,
+    "totalTokenCount": 1211
+  }
+}
